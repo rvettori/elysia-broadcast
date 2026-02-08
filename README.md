@@ -78,10 +78,16 @@ const unsubscribe = manager.subscribe('notifications', 123, (event) => {
   console.log('Event received:', event.type, event.data);
 });
 
-// Broadcast
+// Broadcast to specific user
 manager.broadcast('notifications', 123, {
   type: 'notification.new',
   data: { message: 'Hello!' }
+});
+
+// Broadcast to ALL users in channel
+manager.broadcast('notifications', {
+  type: 'system.announcement',
+  data: { message: 'System maintenance at 3pm' }
 });
 
 // Cleanup
@@ -148,15 +154,22 @@ const unsubscribe = manager.subscribe('todos', 123, (event) => {
 });
 ```
 
-**`broadcast(channel, userId, event)`**
+**`broadcast(channel, userId, event)`** | **`broadcast(channel, event)`**
 
-Send event to all listeners on the channel/user.
+Send event to all listeners on the channel/user. Omit userId to broadcast to all users in the channel.
 
 ```typescript
+// Broadcast to specific user
 manager.broadcast('todos', 123, {
   type: 'update',
   data: { id: 1 },
   html: '<div>...</div>' // Optional
+});
+
+// Broadcast to ALL users in channel (no userId)
+manager.broadcast('todos', {
+  type: 'system.announcement',
+  data: { message: 'New feature available!' }
 });
 ```
 
@@ -277,12 +290,24 @@ app.post('/analytics/track', ({ store, body }) => {
 ### Notifications
 
 ```typescript
+// Send to specific user
 app.post('/notifications/send', ({ store, body }) => {
   store.broadcast.broadcast('notifications', recipientId, {
     type: 'notification.new',
     data: { 
       title: 'New comment',
       message: 'Someone commented on your post'
+    }
+  });
+});
+
+// Send to all users (system announcement)
+app.post('/admin/announce', ({ store, body }) => {
+  store.broadcast.broadcast('notifications', {
+    type: 'system.announcement',
+    data: { 
+      title: 'System Update',
+      message: 'New features available!'
     }
   });
 });

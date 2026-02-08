@@ -74,7 +74,7 @@ export class BroadcastManager extends EventEmitter {
   }
 
   /**
-   * Sends event to all listeners of a specific user channel
+   * Sends event to a specific user in a channel
    * 
    * @param channel - Channel name
    * @param userId - User ID (number or string)
@@ -89,12 +89,44 @@ export class BroadcastManager extends EventEmitter {
    * });
    * ```
    */
-  broadcast(channel: string, userId: number | string, event: BroadcastEvent): void {
-    const key = this.getChannelKey(channel, userId);
-    const channelCallbacks = this.connections.get(key);
+  broadcast(channel: string, userId: number | string, event: BroadcastEvent): void;
 
-    if (channelCallbacks) {
-      channelCallbacks.forEach(callback => callback(event));
+  /**
+   * Sends event to all users in a channel
+   * 
+   * @param channel - Channel name
+   * @param event - Event to be sent
+   * 
+   * @example
+   * ```ts
+   * manager.broadcast('todos', {
+   *   type: 'system.announcement',
+   *   data: { message: 'System maintenance in 5 minutes' }
+   * });
+   * ```
+   */
+  broadcast(channel: string, event: BroadcastEvent): void;
+
+  // Implementation
+  broadcast(channel: string, userIdOrEvent: number | string | BroadcastEvent, event?: BroadcastEvent): void {
+    // If event is undefined, userIdOrEvent is the event and should broadcast to all
+    if (event === undefined) {
+      const eventData = userIdOrEvent as BroadcastEvent;
+      // Broadcast to all users in the channel
+      this.connections.forEach((callbacks, key) => {
+        if (key.startsWith(`${channel}:`)) {
+          callbacks.forEach(callback => callback(eventData));
+        }
+      });
+    } else {
+      // Broadcast to specific user
+      const userId = userIdOrEvent as number | string;
+      const key = this.getChannelKey(channel, userId);
+      const channelCallbacks = this.connections.get(key);
+
+      if (channelCallbacks) {
+        channelCallbacks.forEach(callback => callback(event));
+      }
     }
   }
 

@@ -136,6 +136,32 @@ const app = new Elysia()
     })
   )
 
+  // Admin Routes
+  .group('/admin', (app) => app
+    .onBeforeHandle(authMiddleware)
+
+    // Broadcast announcement to ALL users
+    .post('/announce', ({ store, body }: any) => {
+      const { message, channel = 'notifications' } = body;
+
+      // Broadcast to ALL users in the channel (no userId param)
+      store.broadcast.broadcast(channel, {
+        type: 'system.announcement',
+        data: {
+          message,
+          timestamp: new Date().toISOString(),
+          priority: 'high'
+        }
+      });
+
+      return {
+        success: true,
+        broadcastTo: 'all users',
+        channel
+      };
+    })
+  )
+
   // Server status
   .get('/status', ({ store }) => {
     return {
@@ -157,9 +183,13 @@ console.log('2. Create a todo:');
 console.log('   curl -X POST -H "x-user-id: 1" -H "Content-Type: application/json" \\');
 console.log('     -d \'{"task":"Buy bread"}\' http://localhost:3000/todos');
 console.log('');
-console.log('3. Send notification:');
+console.log('3. Send notification to specific user:');
 console.log('   curl -X POST -H "x-user-id: 1" -H "Content-Type: application/json" \\');
 console.log('     -d \'{"recipientId":2,"message":"Hello!"}\' http://localhost:3000/notifications/send');
 console.log('');
-console.log('4. View status:');
+console.log('4. Broadcast announcement to ALL users:');
+console.log('   curl -X POST -H "x-user-id: 1" -H "Content-Type: application/json" \\');
+console.log('     -d \'{"message":"System maintenance at 3pm"}\' http://localhost:3000/admin/announce');
+console.log('');
+console.log('5. View status:');
 console.log('   curl http://localhost:3000/status');

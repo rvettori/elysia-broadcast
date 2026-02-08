@@ -106,6 +106,55 @@ describe('BroadcastManager', () => {
 
       expect(received.html).toBe('<div>Test</div>');
     });
+
+    it('should broadcast to all users in channel without userId param', () => {
+      let count = 0;
+
+      manager.subscribe('test', 1, () => count++);
+      manager.subscribe('test', 2, () => count++);
+      manager.subscribe('test', 3, () => count++);
+      manager.subscribe('other', 1, () => count++);
+
+      manager.broadcast('test', { type: 'update', data: {} });
+
+      expect(count).toBe(3);
+    });
+
+    it('should broadcast to all listeners of all users in channel', () => {
+      let count = 0;
+
+      manager.subscribe('test', 1, () => count++);
+      manager.subscribe('test', 1, () => count++);
+      manager.subscribe('test', 2, () => count++);
+
+      manager.broadcast('test', { type: 'update', data: {} });
+
+      expect(count).toBe(3);
+    });
+
+    it('should not broadcast to other channels when broadcasting to all', () => {
+      let count = 0;
+
+      manager.subscribe('channel1', 1, () => count++);
+      manager.subscribe('channel1', 2, () => count++);
+      manager.subscribe('channel2', 1, () => count++);
+
+      manager.broadcast('channel1', { type: 'update', data: {} });
+
+      expect(count).toBe(2);
+    });
+
+    it('should work with string userIds when broadcasting to all', () => {
+      let count = 0;
+
+      manager.subscribe('test', 'user-1', () => count++);
+      manager.subscribe('test', 'user-2', () => count++);
+      manager.subscribe('other', 'user-1', () => count++);
+
+      manager.broadcast('test', { type: 'update', data: {} });
+
+      expect(count).toBe(2);
+    });
   });
 
   describe('getConnectionCount', () => {

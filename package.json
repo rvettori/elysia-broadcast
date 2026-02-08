@@ -1,6 +1,6 @@
 {
   "name": "elysia-broadcast",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Broadcast and SSE system for Elysia with support for multiple channels per user",
   "main": "dist/index.js",
   "module": "dist/index.js",
