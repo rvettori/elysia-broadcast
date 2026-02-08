@@ -1,0 +1,51 @@
+{
+  "name": "elysia-broadcast",
+  "version": "0.1.0",
+  "description": "Broadcast and SSE system for Elysia with support for multiple channels per user",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "bun build src/index.ts --outdir dist --target bun --format esm && bun run build:types && bun run build:copy",
+    "build:types": "tsc --emitDeclarationOnly --declaration --declarationMap --outDir dist",
+    "build:copy": "cp src/client.js dist/client.js",
+    "dev": "bun --watch src/index.ts",
+    "test": "bun test",
+    "prepublishOnly": "bun run build"
+  },
+  "keywords": [
+    "elysia",
+    "broadcast",
+    "sse",
+    "server-sent-events",
+    "realtime",
+    "websocket",
+    "events"
+  ],
+  "author": "Rafael Vettori",
+  "license": "MIT",
+  "peerDependencies": {
+    "elysia": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "elysia": "^1.0.0",
+    "typescript": "^5.3.3"
+  },
+  "files": [
+    "dist",
+    "src/client.js",
+    "README.md",
+    "package.json"
+  ],
+  "dependencies": {
+    "@types/bun": "^1.3.8"
+  }
+}
