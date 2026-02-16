@@ -10,7 +10,7 @@
  */
 
 import { Elysia } from 'elysia';
-import { broadcastPlugin, streamPlugin } from 'elysia-broadcast';
+import { broadcastPlugin, streamPlugin } from '@rvettori/elysia-broadcast';
 
 // Database simulation
 const users = new Map([

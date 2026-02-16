@@ -1,4 +1,4 @@
-# elysia-broadcast
+# @rvettori/elysia-broadcast
 
 Broadcast and Server-Sent Events (SSE) system for Elysia with multi-channel per-user support.
 
@@ -15,7 +15,7 @@ Broadcast and Server-Sent Events (SSE) system for Elysia with multi-channel per-
 ## 📦 Installation
 
 ```bash
-bun add elysia-broadcast
+bun add @rvettori/elysia-broadcast
 ```
 
 ## 🎯 Basic Usage
@@ -24,7 +24,7 @@ bun add elysia-broadcast
 
 ```typescript
 import { Elysia } from 'elysia';
-import { broadcastPlugin, streamPlugin } from 'elysia-broadcast';
+import { broadcastPlugin, streamPlugin } from '@rvettori/elysia-broadcast';
 
 const app = new Elysia()
   .use(broadcastPlugin())
@@ -69,7 +69,7 @@ The `streamPlugin` automatically provides a client library at `/vendor/elysia-ss
 ### BroadcastManager Standalone
 
 ```typescript
-import { BroadcastManager } from 'elysia-broadcast';
+import { BroadcastManager } from '@rvettori/elysia-broadcast';
 
 const manager = new BroadcastManager();
 

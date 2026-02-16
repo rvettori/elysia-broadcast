@@ -1,5 +1,7 @@
 import { describe, it, expect, beforeEach } from 'bun:test';
+import { Elysia } from 'elysia';
 import { BroadcastManager } from '../src/manager';
+import { alpineRequest } from '../src/plugin';
 
 describe('BroadcastManager', () => {
   let manager: BroadcastManager;
@@ -240,5 +242,96 @@ describe('BroadcastManager', () => {
       expect(manager.getTotalConnections()).toBe(0);
       expect(manager.getActiveChannels()).toEqual([]);
     });
+  });
+});
+
+describe('alpineRequest Plugin', () => {
+  it('should detect Alpine AJAX request with x-alpine-request header', async () => {
+    const app = new Elysia()
+      .use(alpineRequest)
+      .get('/test', ({ isAlpineRequest }) => ({ isAlpineRequest }));
+
+    const response = await app.handle(
+      new Request('http://localhost/test', {
+        headers: { 'x-alpine-request': 'true' }
+      })
+    );
+
+    const data = await response.json();
+    expect(data.isAlpineRequest).toBe(true);
+  });
+
+  it('should return false for non-Alpine requests', async () => {
+    const app = new Elysia()
+      .use(alpineRequest)
+      .get('/test', ({ isAlpineRequest }) => ({ isAlpineRequest }));
+
+    const response = await app.handle(
+      new Request('http://localhost/test')
+    );
+
+    const data = await response.json();
+    expect(data.isAlpineRequest).toBe(false);
+  });
+
+  it('should return false when x-alpine-request is not "true"', async () => {
+    const app = new Elysia()
+      .use(alpineRequest)
+      .get('/test', ({ isAlpineRequest }) => ({ isAlpineRequest }));
+
+    const response = await app.handle(
+      new Request('http://localhost/test', {
+        headers: { 'x-alpine-request': 'false' }
+      })
+    );
+
+    const data = await response.json();
+    expect(data.isAlpineRequest).toBe(false);
+  });
+
+  it('should work with multiple routes', async () => {
+    const app = new Elysia()
+      .use(alpineRequest)
+      .get('/fragment', ({ isAlpineRequest }) =>
+        isAlpineRequest ? { html: '<div>Fragment</div>' } : { page: 'Full' }
+      )
+      .get('/other', ({ isAlpineRequest }) => ({ isAlpine: isAlpineRequest }));
+
+    // Alpine request to /fragment
+    const response1 = await app.handle(
+      new Request('http://localhost/fragment', {
+        headers: { 'x-alpine-request': 'true' }
+      })
+    );
+    const data1 = await response1.json();
+    expect(data1.html).toBe('<div>Fragment</div>');
+
+    // Normal request to /fragment
+    const response2 = await app.handle(
+      new Request('http://localhost/fragment')
+    );
+    const data2 = await response2.json();
+    expect(data2.page).toBe('Full');
+
+    // Alpine request to /other
+    const response3 = await app.handle(
+      new Request('http://localhost/other', {
+        headers: { 'x-alpine-request': 'true' }
+      })
+    );
+    const data3 = await response3.json();
+    expect(data3.isAlpine).toBe(true);
+  });
+
+  it('should expose isAlpineRequest in context', async () => {
+    const app = new Elysia()
+      .use(alpineRequest)
+      .get('/check', (ctx) => {
+        expect(ctx).toHaveProperty('isAlpineRequest');
+        expect(typeof ctx.isAlpineRequest).toBe('boolean');
+        return { ok: true };
+      });
+
+    await app.handle(new Request('http://localhost/check'));
   });
 });

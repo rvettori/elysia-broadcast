@@ -11,7 +11,7 @@ import type { StreamPluginOptions, BroadcastEvent } from './types';
  * @example
  * ```ts
  * import { Elysia } from 'elysia';
- * import { streamPlugin } from 'elysia-broadcast';
+ * import { streamPlugin } from '@rvettori/elysia-broadcast';
  * import { sessionAuth } from './auth';
  * 
  * const app = new Elysia()

@@ -1,5 +1,5 @@
 {
-  "name": "elysia-broadcast",
+  "name": "@rvettori/elysia-broadcast",
   "version": "0.2.0",
   "description": "Broadcast and SSE system for Elysia with support for multiple channels per user",
   "main": "dist/index.js",

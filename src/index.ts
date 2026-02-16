@@ -8,7 +8,7 @@
  */
 
 export { BroadcastManager } from './manager';
-export { broadcastPlugin, broadcastManager } from './plugin';
+export { broadcastPlugin, broadcastManager, alpineRequest } from './plugin';
 export { streamPlugin } from './stream';
 export type {
   BroadcastEvent,
