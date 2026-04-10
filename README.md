@@ -8,6 +8,7 @@ Broadcast and Server-Sent Events (SSE) system for Elysia with multi-channel per-
 - ✅ **Type-safe** - Fully typed with TypeScript
 - ✅ **SSE out-of-the-box** - Ready-to-use Server-Sent Events plugin with client library
 - ✅ **Alpine.js compatible** - Works seamlessly with Alpine.morph and x-sync
+- ✅ **JSON events** - Dispatches native `CustomEvent` on `document` for JSON-only broadcasts
 - ✅ **Flexible** - Use `BroadcastManager` standalone or as an Elysia plugin
 - ✅ **Lightweight** - Zero dependencies besides Elysia
 - ✅ **Tested** - Complete test coverage
@@ -227,7 +228,7 @@ Removes all connections.
   // Basic connection
   ElysiaSSE.connect('notifications');
   
-  // With custom handler
+  // With custom handler (receives the full event object)
   ElysiaSSE.connect('messages', {
     onUpdate: (data) => {
       console.log('New message:', data);
@@ -237,6 +238,49 @@ Removes all connections.
     onError: (err) => console.error('Error:', err)
   });
 </script>
+```
+
+### JSON Events (CustomEvent)
+
+When a broadcast includes a `data` payload, the client automatically dispatches a native `CustomEvent` on `document` with the name `sse:<type>`. This works regardless of whether `html` is also present.
+
+**Server:**
+```typescript
+store.broadcast.broadcast('notifications', userId, {
+  type: 'notification.new',
+  data: { title: 'New comment', message: 'Someone replied to your post' }
+});
+```
+
+**Client — Vanilla JS:**
+```html
+<script src="/vendor/elysia-sse.js"></script>
+<script>
+  ElysiaSSE.connect('notifications');
+
+  document.addEventListener('sse:notification.new', (e) => {
+    const { title, message } = e.detail.data;
+    console.log(title, message);
+  });
+</script>
+```
+
+**Client — Alpine.js:**
+```html
+<div x-data="{ count: 0 }" @sse:notification.new.document="count++">
+  <span x-text="count"></span> unread
+</div>
+```
+
+When `html` and `data` are sent together, both are processed: the DOM is updated via Alpine.morph **and** the `CustomEvent` is dispatched.
+
+```typescript
+// Both html update and CustomEvent will fire
+store.broadcast.broadcast('todos', userId, {
+  type: 'todo.created',
+  data: { id: 1, task: 'New task' },
+  html: '<div x-sync id="todo-list">...</div>'
+});
 ```
 
 ### HTMX + SSE
