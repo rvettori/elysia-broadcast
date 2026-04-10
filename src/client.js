@@ -112,6 +112,14 @@ window.ElysiaSSE = {
             console.error('❌ [SSE] Erros:', errors.join(', '));
           }
         }
+
+        // Dispatch native CustomEvent whenever data payload is present
+        if (data.data !== undefined) {
+          document.dispatchEvent(new CustomEvent('sse:' + data.type, {
+            detail: data,
+            bubbles: true
+          }));
+        }
       } catch (error) {
         console.error('❌ [SSE] Erro ao processar evento:', error);
       }
